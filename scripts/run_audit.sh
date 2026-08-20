@@ -5,6 +5,7 @@ out_dir="${1:?output directory is required}"
 previous_state="${2:?previous state path is required}"
 mkdir -p "$out_dir"
 owner="${GITHUB_REPOSITORY_OWNER:-balajirajput96}"
+source_commit="${GITHUB_SHA:-local-limit-guard}"
 export GH_PAGER=cat GH_FORCE_TTY=0 NO_COLOR=1
 
 repos="$out_dir/repos.tsv"
@@ -30,6 +31,7 @@ if [ "$previous_number" -ge 2400 ]; then
     --arg repository_owner "$owner" \
     --arg repository "${GITHUB_REPOSITORY:-$owner/github-audit-automation}" \
     --arg workflow "hourly-audit.yml" \
+    --arg source_commit "$source_commit" \
     --arg toolchain "GitHub CLI, GitHub REST API, optional Gemini API" \
     --arg action "hourly_maintenance_run_limit_guard" \
     --arg result "skipped" \
@@ -38,7 +40,7 @@ if [ "$previous_number" -ge 2400 ]; then
     --arg validation_status "run_limit_guard_written" \
     --arg remaining_blocker "configured_2400_run_limit_reached" \
     --arg next_action "review_or_reconfigure_the_schedule_before_any_additional_maintenance" \
-    '{execution_number:$execution_number,timestamp:$timestamp,repository_owner:$repository_owner,repository:$repository,workflow:$workflow,toolchain:$toolchain,action:$action,result:$result,failure_category:$failure_category,recovery_attempt:$recovery_attempt,validation_status:$validation_status,remaining_blocker:$remaining_blocker,next_action:$next_action}' > "$state"
+    '{execution_number:$execution_number,timestamp:$timestamp,repository_owner:$repository_owner,repository:$repository,workflow:$workflow,source_commit:$source_commit,toolchain:$toolchain,action:$action,result:$result,failure_category:$failure_category,recovery_attempt:$recovery_attempt,validation_status:$validation_status,remaining_blocker:$remaining_blocker,next_action:$next_action}' > "$state"
   printf 'execution_number=2400 result=skipped reason=run_limit_reached\n'
   exit 0
 fi
@@ -87,6 +89,7 @@ jq -n \
   --arg repository_owner "$owner" \
   --arg repository "${GITHUB_REPOSITORY:-$owner/github-audit-automation}" \
   --arg workflow "hourly-audit.yml" \
+  --arg source_commit "$source_commit" \
   --arg toolchain "GitHub CLI, GitHub REST API, optional Gemini API" \
   --arg action "inventory_active_nonfork_repositories_open_prs_and_recent_workflows" \
   --arg result "completed" \
@@ -95,6 +98,6 @@ jq -n \
   --arg validation_status "inventory_artifacts_written" \
   --arg remaining_blocker "$(if [ -f "$out_dir/blocker.txt" ]; then tr '\n' ' ' < "$out_dir/blocker.txt"; else printf 'none_recorded_by_inventory_runner'; fi)" \
   --arg next_action "inspect_current_failure_rows_and_repair_only_reproducible_issues" \
-  '{execution_number:$execution_number,timestamp:$timestamp,repository_owner:$repository_owner,repository:$repository,workflow:$workflow,toolchain:$toolchain,action:$action,result:$result,failure_category:$failure_category,recovery_attempt:$recovery_attempt,validation_status:$validation_status,remaining_blocker:$remaining_blocker,next_action:$next_action}' > "$state"
+  '{execution_number:$execution_number,timestamp:$timestamp,repository_owner:$repository_owner,repository:$repository,workflow:$workflow,source_commit:$source_commit,toolchain:$toolchain,action:$action,result:$result,failure_category:$failure_category,recovery_attempt:$recovery_attempt,validation_status:$validation_status,remaining_blocker:$remaining_blocker,next_action:$next_action}' > "$state"
 
 printf 'execution_number=%s\nrepos=%s\nopen_pr_rows=%s\nrecent_failure_rows=%s\n' "$execution_number" "$(($(wc -l < "$repos")-1))" "$(($(wc -l < "$prs")-1))" "$(($(wc -l < "$fails")-1))"
