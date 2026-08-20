@@ -11,5 +11,6 @@
   "next_action": "inspect_current_failure_rows_and_repair_only_reproducible_issues",
   "repository": "balajirajput96/github-audit-automation",
   "workflow": "hourly-audit.yml",
-  "toolchain": "GitHub CLI, GitHub REST API, optional Gemini API"
+  "toolchain": "GitHub CLI, GitHub REST API, optional Gemini API",
+  "source_commit": "e1cc2ff0fea1d7d537db57815c06e68f79fa0c93"
 }
