@@ -15,3 +15,13 @@ The workflow never writes to the default branch, never stores credentials in the
 Each execution increments `execution_number` from 1 through 2,400 and records the UTC timestamp, repository/workflow actions, results, failure categories, recovery attempts, validation status, blockers, and next action. The state is stored on `automation-state`, not `main`, so scheduled persistence does not bypass protected default-branch review.
 
 The workflow is intentionally bounded and idempotent. It reads the previous state before creating the next record, keeps only current audit artifacts plus the latest state, and never attempts destructive operations or automatic merges.
+
+When the prior state has already reached 2,400 executions, the runner produces a recoverable no-op record with `result: skipped` and `validation_status: run_limit_guard_written`. This explicit expiry guard prevents additional inventory work while retaining an auditable state for later review or deliberate reconfiguration.
+
+## Local guard regression check
+
+Run the following command to validate that the 2,400-run guard writes the expected state without calling GitHub or Gemini:
+
+```bash
+bash scripts/test_run_limit_guard.sh
+```

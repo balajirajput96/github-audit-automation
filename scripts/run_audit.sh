@@ -17,6 +17,30 @@ state="$out_dir/execution-state.json"
 printf 'repo\tdefault_branch\tupdated_at\thtml_url\n' > "$repos"
 printf 'repo\tpr_number\ttitle\thead_ref\tbase_ref\thead_sha\tdraft\tmergeable_state\tupdated_at\turl\texcluded_jules\n' > "$prs"
 printf 'repo\trun_id\tstatus\tconclusion\tcreated_at\tupdated_at\thead_branch\tworkflow\tevent\turl\n' > "$runs"
+printf 'repo\trun_id\tstatus\tconclusion\tcreated_at\tupdated_at\thead_branch\tworkflow\tevent\turl\n' > "$fails"
+
+previous_number=$(jq -r '.execution_number // 0' "$previous_state" 2>/dev/null || printf '0')
+if ! [[ "$previous_number" =~ ^[0-9]+$ ]]; then previous_number=0; fi
+
+if [ "$previous_number" -ge 2400 ]; then
+  printf 'Gemini analysis skipped because the 2,400-run maintenance ceiling has been reached.\n' > "$analysis"
+  jq -n \
+    --argjson execution_number 2400 \
+    --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+    --arg repository_owner "$owner" \
+    --arg action "hourly_maintenance_run_limit_guard" \
+    --arg result "skipped" \
+    --arg failure_category "none" \
+    --arg recovery_attempt "not_applicable" \
+    --arg validation_status "run_limit_guard_written" \
+    --arg remaining_blocker "configured_2400_run_limit_reached" \
+    --arg next_action "review_or_reconfigure_the_schedule_before_any_additional_maintenance" \
+    '{execution_number:$execution_number,timestamp:$timestamp,repository_owner:$repository_owner,action:$action,result:$result,failure_category:$failure_category,recovery_attempt:$recovery_attempt,validation_status:$validation_status,remaining_blocker:$remaining_blocker,next_action:$next_action}' > "$state"
+  printf 'execution_number=2400 result=skipped reason=run_limit_reached\n'
+  exit 0
+fi
+
+execution_number=$((previous_number + 1))
 
 if ! gh api --paginate 'user/repos?per_page=100&affiliation=owner' --jq '.[] | select(.fork == false and .archived == false and .owner.login == "'"$owner"'") | [.name,.default_branch,.updated_at,.html_url] | @tsv' > "$repos.raw"; then
   printf 'Authentication or repository inventory unavailable to this workflow token.\n' > "$out_dir/blocker.txt"
@@ -33,15 +57,9 @@ while IFS=$'\t' read -r repo default_branch updated_at html_url; do
   printf '%s' "$workflow_runs" | jq -r --arg repo "$repo" '.workflow_runs[] | [$repo,(.id|tostring),.status,(.conclusion//""),.created_at,.updated_at,(.head_branch//""),(.name//""),(.event//""),.html_url] | @tsv' >> "$runs"
 done < <(tail -n +2 "$repos")
 
-head -n 1 "$runs" > "$fails"
 tail -n +2 "$runs" | awk -F '\t' 'BEGIN{OFS="\t"} $4=="failure" || $4=="timed_out" || $4=="startup_failure" || ($3!="completed" && $3!="") {print}' >> "$fails"
 
-previous_number=$(jq -r '.execution_number // 0' "$previous_state" 2>/dev/null || printf '0')
-if ! [[ "$previous_number" =~ ^[0-9]+$ ]]; then previous_number=0; fi
-execution_number=$((previous_number + 1))
-if [ "$execution_number" -gt 2400 ]; then execution_number=2400; fi
-
-if [ -n "${GEMINI_API_KEY:-}" ] && [ -s "$fails" ]; then
+if [ -n "${GEMINI_API_KEY:-}" ] && [ "$(wc -l < "$fails")" -gt 1 ]; then
   summary=$(awk -F '\t' 'NR>1{print $1 ":" $4}' "$fails" | head -n 30 | tr '\n' ';' | sed 's/"/\\"/g')
   payload=$(jq -n --arg text "Classify these GitHub audit failure rows concisely. Do not suggest credential changes or bypasses. Rows: $summary" '{contents:[{parts:[{text:$text}]}]}')
   gemini_ok=false
