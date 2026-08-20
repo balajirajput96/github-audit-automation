@@ -12,7 +12,7 @@ The workflow never writes to the default branch, never stores credentials in the
 
 ## State model
 
-Each execution increments `execution_number` from 1 through 2,400 and records the UTC timestamp, repository/workflow actions, results, failure categories, recovery attempts, validation status, blockers, and next action. The state is stored on `automation-state`, not `main`, so scheduled persistence does not bypass protected default-branch review.
+Each execution increments `execution_number` from 1 through 2,400 and records the UTC timestamp, repository, workflow, toolchain, actions, results, failure categories, recovery attempts, validation status, blockers, and next action. The state is stored on `automation-state`, not `main`, so scheduled persistence does not bypass protected default-branch review. The branch retains `state/execution-<number>.json` for every mission cycle as well as `state/execution-state.json` for continuation from the latest verified state.
 
 The workflow is intentionally bounded and idempotent. It reads the previous state before creating the next record, keeps only current audit artifacts plus the latest state, and never attempts destructive operations or automatic merges.
 

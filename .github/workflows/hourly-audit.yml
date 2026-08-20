@@ -72,10 +72,14 @@ jobs:
             git switch --orphan automation-state
             git rm -rf . 2>/dev/null || true
           fi
-          rm -rf state artifacts
+          rm -rf artifacts
           mkdir -p state artifacts
           cp "$RUNNER_TEMP/audit/execution-state.json" state/execution-state.json
-          cp "$RUNNER_TEMP/audit/execution-state.json" "state/execution-${GITHUB_RUN_NUMBER}.json"
+          execution_number="$(jq -r '.execution_number' "$RUNNER_TEMP/audit/execution-state.json")"
+          case "$execution_number" in
+            ''|*[!0-9]*) echo 'Invalid execution number in audit state.' >&2; exit 1 ;;
+          esac
+          cp "$RUNNER_TEMP/audit/execution-state.json" "state/execution-${execution_number}.json"
           cp "$RUNNER_TEMP/audit/repos.tsv" artifacts/repos.tsv
           cp "$RUNNER_TEMP/audit/open-prs.tsv" artifacts/open-prs.tsv
           cp "$RUNNER_TEMP/audit/recent-runs.tsv" artifacts/recent-runs.tsv

@@ -10,6 +10,9 @@ printf '{"execution_number":2400}\n' > "$temporary_directory/previous-state.json
 
 jq -e '
   .execution_number == 2400 and
+  .repository == "balajirajput96/github-audit-automation" and
+  .workflow == "hourly-audit.yml" and
+  .toolchain == "GitHub CLI, GitHub REST API, optional Gemini API" and
   .action == "hourly_maintenance_run_limit_guard" and
   .result == "skipped" and
   .validation_status == "run_limit_guard_written"
