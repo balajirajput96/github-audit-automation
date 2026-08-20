@@ -1,0 +1,11 @@
+# Local audit output
+*.local
+/tmp/
+.env
+.env.*
+
+# Never persist credentials or generated local state
+*.pem
+*.key
+credentials.json
+secrets.json

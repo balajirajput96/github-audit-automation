@@ -1,0 +1,91 @@
+name: Hourly GitHub audit continuation
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 * * * *"
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: hourly-github-audit
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout workflow branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Load prior automation state
+        id: prior-state
+        env:
+          GH_TOKEN: ${{ secrets.AUDIT_GH_TOKEN || github.token }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          git fetch --no-tags origin automation-state:refs/remotes/origin/automation-state || true
+          if git cat-file -e refs/remotes/origin/automation-state:state/execution-state.json 2>/dev/null; then
+            git show refs/remotes/origin/automation-state:state/execution-state.json > "$RUNNER_TEMP/previous-state.json"
+          else
+            printf '{"execution_number":0}\n' > "$RUNNER_TEMP/previous-state.json"
+          fi
+
+      - name: Run secret-safe repository inventory
+        env:
+          GH_TOKEN: ${{ secrets.AUDIT_GH_TOKEN || github.token }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          chmod +x scripts/run_audit.sh
+          mkdir -p "$RUNNER_TEMP/audit"
+          scripts/run_audit.sh "$RUNNER_TEMP/audit" "$RUNNER_TEMP/previous-state.json"
+
+      - name: Publish audit artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: hourly-audit-${{ github.run_number }}
+          path: ${{ runner.temp }}/audit
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Persist execution state on dedicated branch
+        env:
+          GH_TOKEN: ${{ secrets.AUDIT_GH_TOKEN || github.token }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          git fetch --no-tags origin automation-state:refs/remotes/origin/automation-state || true
+          if git show-ref --verify --quiet refs/remotes/origin/automation-state; then
+            git switch --create automation-state --track origin/automation-state
+          else
+            git switch --orphan automation-state
+            git rm -rf .
+          fi
+          rm -rf state artifacts
+          mkdir -p state artifacts
+          cp "$RUNNER_TEMP/audit/execution-state.json" state/execution-state.json
+          cp "$RUNNER_TEMP/audit/execution-state.json" "state/execution-${GITHUB_RUN_NUMBER}.json"
+          cp "$RUNNER_TEMP/audit/repos.tsv" artifacts/repos.tsv
+          cp "$RUNNER_TEMP/audit/open-prs.tsv" artifacts/open-prs.tsv
+          cp "$RUNNER_TEMP/audit/recent-runs.tsv" artifacts/recent-runs.tsv
+          cp "$RUNNER_TEMP/audit/recent-failures.tsv" artifacts/recent-failures.tsv
+          cp "$RUNNER_TEMP/audit/gemini-analysis.txt" artifacts/gemini-analysis.txt
+          if [ -f "$RUNNER_TEMP/audit/blocker.txt" ]; then cp "$RUNNER_TEMP/audit/blocker.txt" artifacts/blocker.txt; fi
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add state artifacts
+          if git diff --cached --quiet; then
+            echo 'No state change to commit.'
+          else
+            git commit -m "chore: persist hourly audit execution $GITHUB_RUN_NUMBER"
+            git push origin HEAD:automation-state
+          fi
