@@ -7,7 +7,7 @@ on:
 
 permissions:
   contents: write
-  actions: read
+  actions: write
 
 concurrency:
   group: hourly-github-audit
@@ -107,4 +107,7 @@ jobs:
           else
             git commit -m "chore: persist hourly audit execution $GITHUB_RUN_NUMBER"
             git push origin HEAD:automation-state
+          fi
+          if [ "$execution_number" -ge 2400 ]; then
+            gh api -X PUT "repos/${{ github.repository }}/actions/workflows/hourly-audit.yml/disable"
           fi

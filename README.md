@@ -16,7 +16,7 @@ Each execution increments `execution_number` from 1 through 2,400 and records th
 
 The workflow is intentionally bounded and idempotent. It reads the previous state before creating the next record, keeps only current audit artifacts plus the latest state, and never attempts destructive operations or automatic merges.
 
-When the prior state has already reached 2,400 executions, the runner produces a recoverable no-op record with `result: skipped` and `validation_status: run_limit_guard_written`. This explicit expiry guard prevents additional inventory work while retaining an auditable state for later review or deliberate reconfiguration.
+At cycle 2,400, the runner writes a recoverable no-op record with `result: skipped` and `validation_status: run_limit_guard_written`, persists it on `automation-state`, and then disables this hourly workflow with the narrowly scoped `actions: write` permission. This explicit expiry guard prevents additional inventory work while retaining an auditable terminal state for later review or deliberate reconfiguration.
 
 ## Local guard regression check
 
@@ -24,4 +24,5 @@ Run the following command to validate that the 2,400-run guard writes the expect
 
 ```bash
 bash scripts/test_run_limit_guard.sh
+bash scripts/test_workflow_ceiling_guard.sh
 ```
