@@ -1,0 +1,36 @@
+{
+  "recorded_at": "2026-08-21T01:48:13Z",
+  "owner": "balajirajput96",
+  "persisted_audit_state": {
+    "execution_number": 9,
+    "timestamp": "2026-08-21T01:34:54Z",
+    "next_action": "inspect_current_failure_rows_and_repair_only_reproducible_issues"
+  },
+  "owner_controlled_open_pr_count": 42,
+  "default_branches": {
+    "balajirajput96/github-mcp-server-": "main",
+    "balajirajput96/github-audit-automation": "feature/hourly-audit-bootstrap",
+    "balajirajput96/microsoft-365-agents-toolkit": "dev",
+    "balajirajput96/codex": "main",
+    "balajirajput96/.github": "main",
+    "balajirajput96/vscode-live-server-plus-plus": "master"
+  },
+  "repairs_applied": [],
+  "validated": [
+    "github-audit-automation#1 detached PR head shell syntax and guard tests pass",
+    "codex#42 representative failures are one-hour cancellations with long-running Bazel work",
+    "vscode-live-server-plus-plus#119 build-and-test passes"
+  ],
+  "blockers": [
+    "codex#42 runner-duration/resource cancellations; no deterministic source failure evidenced",
+    "github-audit-automation#1 check-run read denied with Resource not accessible by integration",
+    "vscode-live-server-plus-plus blocked by required review"
+  ],
+  "next_continuation": [
+    "Re-query codex#42 after a fresh run or head update",
+    "Treat repeated one-hour cancellations as a runner/resource blocker unless a deterministic PR-attributable failure appears",
+    "Re-query audit PR checks only with permitted integration access",
+    "Do not bypass reviews, protections, authentication, or runner limits"
+  ],
+  "artifact_root": "/home/ubuntu/ci-repair-state"
+}
