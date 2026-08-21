@@ -11,6 +11,6 @@
   "failure_category": "external_or_review_or_runner_blocker",
   "recovery_attempt": "read_only_requery_and_local_guard_validation; no_remote_repair",
   "validation_status": "local_guard_tests_passed; remote_integration_not_claimed",
-  "remaining_blocker": "Current owner PRs: career-automation-dashboard#1 and github-audit-automation#2 expose no check runs through the authenticated integration; vscode-copilot-cha#22 has one successful check but its requested Copilot review is quota-blocked. Fresh inventory also observed in-progress maintenance runs; no deterministic source failure was isolated.",
-  "next_action": "requery in-progress runs and PR checks; repair only a reproducible authorized failure; preserve reviews, protections, authentication, runner limits, and semantic-conflict safety; persist terminal state at execution 2400"
+  "remaining_blocker": "Current owner PRs: career-automation-dashboard#1 and github-audit-automation#2 expose no check runs through the authenticated integration; vscode-copilot-cha#22 has one successful check but its requested Copilot review is quota-blocked. Previously observed in-progress maintenance runs were re-queried and completed successfully; no deterministic source failure was isolated.",
+  "next_action": "requery PR checks; repair only a reproducible authorized failure; preserve reviews, protections, authentication, runner limits, and semantic-conflict safety; persist terminal state at execution 2400"
 }
