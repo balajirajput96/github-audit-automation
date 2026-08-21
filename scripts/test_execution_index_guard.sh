@@ -34,4 +34,17 @@ write_state 2 skipped
 "$repository_root/scripts/update_execution_index.sh" "$state_file" "$index_file" "$output_file"
 test "$(jq -s 'length' "$output_file")" -eq 2
 
-printf 'PASS: execution index rejects gaps and avoids duplicate terminal guard entries.\n'
+write_state 3 skipped
+cp "$state_file" "$temporary_directory/execution-3.json"
+printf '{"execution_number":1}\n{"execution_number":2}\n{"execution_number":3' > "$index_file"
+"$repository_root/scripts/update_execution_index.sh" "$state_file" "$index_file" "$output_file"
+test "$(jq -s 'length' "$output_file")" -eq 3
+test "$(jq -s '.[2].execution_number == 3' "$output_file")" = true
+mv "$output_file" "$index_file"
+
+write_state 4 completed
+"$repository_root/scripts/update_execution_index.sh" "$state_file" "$index_file" "$output_file"
+test "$(jq -s 'length' "$output_file")" -eq 4
+test "$(jq -s '.[3].execution_number == 4' "$output_file")" = true
+
+printf 'PASS: execution index rejects gaps, recovers a truncated trailing record, and avoids duplicate terminal guard entries.\n'
