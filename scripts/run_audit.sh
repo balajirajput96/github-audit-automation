@@ -47,9 +47,38 @@ fi
 
 execution_number=$((previous_number + 1))
 
-if ! gh api --paginate 'user/repos?per_page=100&affiliation=owner' --jq '.[] | select(.fork == false and .archived == false and .owner.login == "'"$owner"'") | [.name,.default_branch,.updated_at,.html_url] | @tsv' > "$repos.raw"; then
-  printf 'Authentication or repository inventory unavailable to this workflow token.\n' > "$out_dir/blocker.txt"
+inventory_ok=false
+if gh api --paginate 'user/repos?per_page=100&affiliation=owner' --jq '.[] | select(.fork == false and .archived == false and .owner.login == "'"$owner"'") | [.name,.default_branch,.updated_at,.html_url] | @tsv' > "$repos.raw" 2>/dev/null; then
+  inventory_ok=true
+else
+  # The default Actions token can read the current repository but cannot call
+  # the user-scoped /user/repos endpoint. Fall back to GitHub's public API so
+  # public repositories remain auditable without copying or widening secrets.
+  public_inventory_ok=true
   : > "$repos.raw"
+  for page in 1 2 3 4 5; do
+    page_data=$(curl -fsSL --max-time 30 -H 'Accept: application/vnd.github+json' \
+      "https://api.github.com/users/${owner}/repos?type=owner&per_page=100&page=${page}" 2>/dev/null) || {
+      public_inventory_ok=false
+      break
+    }
+    page_count=$(printf '%s' "$page_data" | jq 'if type == "array" then length else 0 end' 2>/dev/null) || {
+      public_inventory_ok=false
+      break
+    }
+    if ! printf '%s' "$page_data" | jq -r --arg owner "$owner" \
+      '.[] | select(.fork == false and .archived == false and .owner.login == $owner) | [.name,.default_branch,.updated_at,.html_url] | @tsv' >> "$repos.raw"; then
+      public_inventory_ok=false
+      break
+    fi
+    [ "$page_count" -lt 100 ] && break
+  done
+  if [ "$public_inventory_ok" = true ]; then
+    inventory_ok=true
+  else
+    printf 'Authentication or public repository inventory unavailable to this workflow token/API.\n' > "$out_dir/blocker.txt"
+    : > "$repos.raw"
+  fi
 fi
 cat "$repos.raw" >> "$repos"
 
