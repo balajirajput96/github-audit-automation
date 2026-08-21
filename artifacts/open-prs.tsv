@@ -1,1 +1,4 @@
 repo	pr_number	title	head_ref	base_ref	head_sha	draft	mergeable_state	updated_at	url	excluded_jules
+career-automation-dashboard	1	test: isolate career router from ambient database	manus/isolate-career-unit-db	main	f31a7e8985e0608e8d2519d2af8cca6d577e31ad	false		2026-08-21T23:26:51Z	https://github.com/balajirajput96/career-automation-dashboard/pull/1	false
+github-audit-automation	2	fix: fall back to public repository inventory	fix/public-inventory-fallback	feature/hourly-audit-bootstrap	87ac83c91ba4c9a605df4b4fefcfeffcae5b4f2f	false		2026-08-21T23:32:42Z	https://github.com/balajirajput96/github-audit-automation/pull/2	false
+vscode-copilot-cha	22	fix: skip pharma scan when LLM secret is absent	fix/skip-scan-without-openrouter-key	main	3189d23ae8a392d778bfd13166d9c022b9541a93	false		2026-08-21T23:36:42Z	https://github.com/balajirajput96/vscode-copilot-cha/pull/22	false
