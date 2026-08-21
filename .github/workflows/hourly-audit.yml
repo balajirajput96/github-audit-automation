@@ -49,6 +49,7 @@ jobs:
           set -Eeuo pipefail
           chmod +x scripts/run_audit.sh
           mkdir -p "$RUNNER_TEMP/audit"
+          cp scripts/update_execution_index.sh "$RUNNER_TEMP/audit/update_execution_index.sh"
           scripts/run_audit.sh "$RUNNER_TEMP/audit" "$RUNNER_TEMP/previous-state.json"
 
       - name: Publish audit artifacts
@@ -82,8 +83,8 @@ jobs:
           cp "$RUNNER_TEMP/audit/execution-state.json" "state/execution-${execution_number}.json"
           index_file="state/execution-index.ndjson"
           temporary_index="$(mktemp)"
-          chmod +x scripts/update_execution_index.sh
-          scripts/update_execution_index.sh "$RUNNER_TEMP/audit/execution-state.json" "$index_file" "$temporary_index"
+          chmod +x "$RUNNER_TEMP/audit/update_execution_index.sh"
+          "$RUNNER_TEMP/audit/update_execution_index.sh" "$RUNNER_TEMP/audit/execution-state.json" "$index_file" "$temporary_index"
           mv "$temporary_index" "$index_file"
           mapfile -t detailed_states < <(find state -maxdepth 1 -type f -name 'execution-[0-9]*.json' -printf '%f\n' | sort -t- -k2,2n)
           if [ "${#detailed_states[@]}" -gt 24 ]; then
