@@ -10,6 +10,8 @@ The workflow never writes to the default branch, never stores credentials in the
 
 `GEMINI_API_KEY` is optional. When present, the workflow sends only a short redacted summary of counts and failure categories to Gemini for concise classification. When absent, the workflow records that Gemini analysis was skipped; it does not fabricate credentials.
 
+The repository inventory first attempts the authenticated GitHub API and falls back to GitHub's public owner-repository endpoint when the workflow token cannot call the user-scoped endpoint. This keeps public auditing available without widening credentials; private-repository inventory still requires the separately authorized `AUDIT_GH_TOKEN` secret.
+
 ## State model
 
 Each execution increments `execution_number` from 1 through 2,400 and records the UTC timestamp, repository, workflow, exact source commit, toolchain, actions, results, failure categories, recovery attempts, validation status, blockers, and next action. The state is stored on `automation-state`, not `main`, so scheduled persistence does not bypass protected default-branch review. The branch appends a compact JSON-lines `state/execution-index.ndjson` record for every mission cycle, retains the latest `state/execution-state.json` for continuation, and keeps the 24 most recent detailed `state/execution-<number>.json` snapshots for diagnosis.
@@ -26,4 +28,5 @@ Run the following command to validate that the 2,400-run guard writes the expect
 bash scripts/test_run_limit_guard.sh
 bash scripts/test_workflow_ceiling_guard.sh
 bash scripts/test_execution_index_guard.sh
+bash scripts/test_public_inventory_fallback.sh
 ```
