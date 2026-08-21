@@ -82,10 +82,8 @@ jobs:
           cp "$RUNNER_TEMP/audit/execution-state.json" "state/execution-${execution_number}.json"
           index_file="state/execution-index.ndjson"
           temporary_index="$(mktemp)"
-          if [ -f "$index_file" ]; then
-            jq -c --argjson execution_number "$execution_number" 'select(.execution_number != $execution_number)' "$index_file" > "$temporary_index"
-          fi
-          jq -c '{execution_number,timestamp,repository,workflow,source_commit,toolchain,action,result,failure_category,recovery_attempt,validation_status,remaining_blocker,next_action}' "$RUNNER_TEMP/audit/execution-state.json" >> "$temporary_index"
+          chmod +x scripts/update_execution_index.sh
+          scripts/update_execution_index.sh "$RUNNER_TEMP/audit/execution-state.json" "$index_file" "$temporary_index"
           mv "$temporary_index" "$index_file"
           mapfile -t detailed_states < <(find state -maxdepth 1 -type f -name 'execution-[0-9]*.json' -printf '%f\n' | sort -t- -k2,2n)
           if [ "${#detailed_states[@]}" -gt 24 ]; then
