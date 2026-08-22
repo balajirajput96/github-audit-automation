@@ -1,1 +1,2 @@
 repo	pr_number	title	head_ref	base_ref	head_sha	draft	mergeable_state	updated_at	url	excluded_jules
+github-mcp-server-	61	Fix email placeholder security validation to enforce example domain usage	fix-email-validation-9994136940113406564	main	46e96586a91ec618b707b7f71463b1d54664e6ce	true		2026-08-22T04:08:02Z	https://github.com/balajirajput96/github-mcp-server-/pull/61	false
