@@ -1,2 +1,1 @@
 repo	pr_number	title	head_ref	base_ref	head_sha	draft	mergeable_state	updated_at	url	excluded_jules
-vscode-copilot-cha	22	fix: skip pharma scan when LLM secret is absent	fix/skip-scan-without-openrouter-key	main	3189d23ae8a392d778bfd13166d9c022b9541a93	false		2026-08-21T23:36:42Z	https://github.com/balajirajput96/vscode-copilot-cha/pull/22	false
