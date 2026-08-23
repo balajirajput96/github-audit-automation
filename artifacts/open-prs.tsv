@@ -1,1 +1,3 @@
 repo	pr_number	title	head_ref	base_ref	head_sha	draft	mergeable_state	updated_at	url	excluded_jules
+vscode-copilot-cha	26	🛡️ Sentinel: Add timeouts to requests in test.py (Fix Bandit B113)	sentinel/fix-requests-timeout-b113-3011895822827792939	main	0bc65cee2028757c7bf77e45b847a70abd51ccbe	true		2026-08-23T21:26:17Z	https://github.com/balajirajput96/vscode-copilot-cha/pull/26	true
+vscode-copilot-cha	25	🛡️ Sentinel: [MEDIUM] Add missing timeout to external API calls	sentinel-requests-timeout-test-9622445225313553019	main	46122bf4779ceb4c5299084222d7e4861c6d1bed	true		2026-08-23T21:13:30Z	https://github.com/balajirajput96/vscode-copilot-cha/pull/25	true
