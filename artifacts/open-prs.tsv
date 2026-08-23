@@ -1,3 +1,4 @@
 repo	pr_number	title	head_ref	base_ref	head_sha	draft	mergeable_state	updated_at	url	excluded_jules
+github-mcp-server-	62	fix(test): avoid false positive secret violation in tests	jules-4270408334655074199-bb044417	main	6043998ce7de270857c1f8e2fddb10ba16fc315b	true		2026-08-23T04:03:04Z	https://github.com/balajirajput96/github-mcp-server-/pull/62	true
 vscode-copilot-cha	24	🛡️ Sentinel: Fix missing timeout in HTTP requests	sentinel-fix-missing-request-timeout-1237747251874301913	main	2ac2ce95734a560891dcc7d00e93a33331fce9ee	true		2026-08-22T21:33:47Z	https://github.com/balajirajput96/vscode-copilot-cha/pull/24	true
 vscode-copilot-cha	23	🛡️ Sentinel: [MEDIUM] Fix missing timeouts in external API requests	sentinel-requests-timeout-fix-12479059775415447744	main	4aad22458279d104664452d3011418f657c30f98	true		2026-08-22T21:10:38Z	https://github.com/balajirajput96/vscode-copilot-cha/pull/23	true
