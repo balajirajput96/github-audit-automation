@@ -8,7 +8,7 @@ grep -q 'if \[ "$execution_number" -ge 2400 \]; then' "$workflow"
 grep -q 'git push origin HEAD:automation-state' "$workflow"
 grep -q 'actions/workflows/hourly-audit.yml/disable' "$workflow"
 grep -q 'cp scripts/update_execution_index.sh "\$RUNNER_TEMP/audit/update_execution_index.sh"' "$workflow"
-grep -q '"\$RUNNER_TEMP/audit/update_execution_index.sh" "\$RUNNER_TEMP/audit/execution-state.json"' "$workflow"
+grep -q '"\$RUNNER_TEMP/audit/update_execution_index.sh" "\$RUNNER_TEMP/audit/execution-state.json" "\$index_file" "\$temporary_index"' "$workflow"
 
 push_line=$(grep -n 'git push origin HEAD:automation-state' "$workflow" | cut -d: -f1)
 disable_line=$(grep -n 'actions/workflows/hourly-audit.yml/disable' "$workflow" | cut -d: -f1)
