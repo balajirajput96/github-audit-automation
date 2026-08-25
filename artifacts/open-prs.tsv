@@ -1,3 +1,1 @@
 repo	pr_number	title	head_ref	base_ref	head_sha	draft	mergeable_state	updated_at	url	excluded_jules
-vscode-copilot-cha	28	🛡️ Sentinel: Enforce requests timeout in test.py	sentinel-fix-requests-timeout-14589997128351625592	main	f0aedf4590a85e837fd16b2283f9db9ad2de3809	true		2026-08-24T21:16:39Z	https://github.com/balajirajput96/vscode-copilot-cha/pull/28	true
-vscode-copilot-cha	27	🛡️ Sentinel: [MEDIUM] Add timeout to requests	sentinel/add-requests-timeout-11336100594361056266	main	5c33d912ca41d06cfc40333fce829ebc5ea9fb03	true		2026-08-24T21:13:11Z	https://github.com/balajirajput96/vscode-copilot-cha/pull/27	true
